@@ -1,0 +1,299 @@
+<!-- Teleoperation UI -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- <link rel="icon" href="favicon.ico"> -->
+    <title>ROS WEB Teleoperater</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="../css/all.min.css">
+    <style>
+        /* add offset for body to avoid top-navbar */
+        body {
+            padding-top: 5rem;
+        }
+
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="css/cover.css" crossorigin="anonymous"> -->
+    <!-- <link rel="stylesheet" href="css/sticky-footer-navbar.css"> -->
+    <script src="../js/eventemitter2.min.js"></script>
+    <script src="../js/roslib.min.js"></script>
+    <script type="text/javascript">
+        // Connecting to ROS
+        // -----------------
+        var ros = new ROSLIB.Ros();
+        ros.on('error', function (error) {
+            document.getElementById('ros_state').innerHTML = "Error";
+        });
+        ros.on('connection', function (error) {
+            document.getElementById('ros_state').innerHTML = "Connected";
+            document.getElementById('camera_image').src = 'http://' + location.hostname + ':8080/stream?topic=/image_raw&type=ros_compressed'
+        });
+        ros.on('close', function (error) {
+            document.getElementById('ros_state').innerHTML = "Closed";
+        });
+        ros.connect('ws://' + location.hostname + ':9090');
+
+        function twistSend(vx, gz) {
+            var pub = new ROSLIB.Topic({
+                ros: ros,
+                name: 'cmd_vel',
+                messageType: 'geometry_msgs/Twist'
+            });
+
+            var twist = new ROSLIB.Message({
+                linear: { x: vx, y: 0, z: 0 },
+                angular: {
+                    x: 0, y: 0, z: gz
+                }
+            });
+            pub.publish(twist);
+        }
+        // send to register a topic
+        twistSend(0, 0);
+    </script>
+</head>
+
+<body class="text-center bg-secondary text-light">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <a class="navbar-brand" href="#"> <i class="fas fa-gamepad"></i> Robot Controller</a>
+    </nav>
+
+    <main role="main" class="container">
+        <p class="">Status： <label id="ros_state">Disconnected</label></p>
+        <div class="row">
+            <div class="col-lg-6 text-center">
+                <!-- CAMERA IMAGE -->
+                <img id="camera_image" class="img-fluid"
+                    src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAACXBIWXMAAAsSAAALEgHS3X78AAAgAElEQVR4nO3dTYxmV3kn8FvV1eWJZNRgZ4GzcBtpLBQsGjlCg+TIloLQwBjZQsPAJrDJiGwwKzMrvDQrkhX2JtHMhmEDwYpsQQBFiWQLazyKYuGRmUGMZNqLmMXYsYWlpNvdVaPndN2m3PR7369773vveX4/qdQNXa56z/0453/P1907frI5bgAASGPfqQYAyEUABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEhGAAQASEYABABIRgAEAEjmwAnP6eh3722Ofu/jpexXP/ifm+P3fOCmx2Hv1680Z37+X8vf9//p75r9//fi5I7X8S3vLWUof7/9D5qrH/iPC7/34KU/b5rL/9zsXXrzermmJs5FW4ajuz5bztUiUYY4R9fLBknUdt/D2PaOn2yO53jU48Z/5w+f6P3nng48TWWNagS++Lpy4dGtfk4ck/1ffm+n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'
+                    alt='web camera streamed image'></img>
+            </div>
+            <div class="col-lg-6 ">
+                <div>Linear: <span id="linearVal">0.00</span>,
+                    Angular: <span id="angularVal">0.00</span> </div>
+                <!-- JOY -->
+                <table class="table table-borderless ">
+                    <tbody>
+                        <tr>
+                            <!-- Left Up -->
+                            <td>
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="leftUp">
+                                        <i class="fas fa-level-up-alt fa-lg fa-rotate-270"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <!-- Up/Forward -->
+                            <td>
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="up">
+                                        <i class="fas fa-caret-up fa-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <!-- Right Up -->
+                            <td>
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="rightUp">
+                                        <i class="fas fa-level-down-alt fa-lg fa-rotate-270"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <!-- Left Turn -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="leftTurn">
+                                        <i class="fas fa-redo-alt fa-lg fa-flip-horizontal"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <!-- Pose  -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="pose">
+                                        <i class="fas fa-circle fa-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <!-- Right Turn -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="rightTurn">
+                                        <i class="fas fa-redo-alt fa-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <!-- Left Down -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="leftDown">
+                                        <i class="fas fa-level-down-alt fa-lg fa-rotate-90"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <!-- Down -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="down">
+                                        <i class="fas fa-caret-down fa-lg"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <!-- Right Down -->
+                                <form>
+                                    <button type="button" class="btn btn-dark btn-lg btn-block" id="rightDown">
+                                        <i class="fas  fa-level-up-alt fa-lg fa-rotate-90"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- End of JOY -->
+
+                <!-- Power Slider -->
+                <form>
+                    <div class="form-group">
+                        <label for="power">Power</label>
+                        <input id="power" class="custom-range" type="range" name="range" min="0" max="100"><span
+                            id="powerVal">50</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="text/javascript">
+
+        var latestId = "pose";
+
+        var linear = 0.0;
+        var angular = 0.0;
+        var power = 0.5;
+        // buttons
+        var leftUpBtn = document.getElementById('leftUp');
+        var upBtn = document.getElementById('up');
+        var rightUpBtn = document.getElementById('rightUp');
+
+        var leftTurnBtn = document.getElementById('leftTurn');
+        var poseBtn = document.getElementById('pose');
+        var rightTurnBtn = document.getElementById('rightTurn');
+
+        var leftDownBtn = document.getElementById('leftDown');
+        var downBtn = document.getElementById('down');
+        var rightDownBtn = document.getElementById('rightDown');
+
+        // sliders
+        var powerSlider = document.getElementById('power');
+        // values display
+        var valueLinear = document.getElementById('linearVal');
+        var valueAngular = document.getElementById('angularVal');
+        var valuePower = document.getElementById('powerVal');
+
+        // add events to sliders
+        powerSlider.addEventListener('input', handlePowerChange);
+
+        // add events to buttons
+        leftUpBtn.addEventListener('mousedown', handleTwistChange);
+        upBtn.addEventListener('mousedown', handleTwistChange);
+        rightUpBtn.addEventListener('mousedown', handleTwistChange);
+
+        leftTurnBtn.addEventListener('mousedown', handleTwistChange);
+        poseBtn.addEventListener('mousedown', handleTwistChange);
+        rightTurnBtn.addEventListener('mousedown', handleTwistChange);
+
+        leftDownBtn.addEventListener('mousedown', handleTwistChange);
+        downBtn.addEventListener('mousedown', handleTwistChange);
+        rightDownBtn.addEventListener('mousedown', handleTwistChange);
+
+        function handlePowerChange(ev) {
+            // update values in the page
+            if (ev.target.id == 'power') {
+                power = parseFloat(ev.target.value) * 0.01;
+                valuePower.innerText = ev.target.value;
+
+                TwistUpdate(latestId);
+            }
+        }
+        function handleTwistChange(ev) {
+            // target is often null. it is assumed you click icon body.
+            // https://qiita.com/sasurai_usagi3/items/45d61fd08cdf7cff57fa
+            if (ev.currentTarget.id) {
+                TwistUpdate(ev.currentTarget.id);
+            } else {
+                console.log('Null id, ' + ev.currentTarget.id);
+            }
+        }
+
+        function TwistUpdate(id) {
+            console.log('Twist is changeing, ' + id);
+            latestId = id;
+            if (id == 'leftUp') {
+                linear = 0.5 * power;
+                angular = 0.5 * power;
+            }
+            if (id == 'up') {
+                linear = power;
+                angular = 0.0;
+            }
+            if (id == 'rightUp') {
+                linear = 0.5 * power;
+                angular = -0.5 * power;
+            }
+
+            if (id == 'leftTurn') {
+                linear = 0.0;
+                angular = power;
+            }
+            if (id == 'pose') {
+                linear = 0.0;
+                angular = 0.0;
+            }
+            if (id == 'rightTurn') {
+                linear = 0.0;
+                angular = -power;
+            }
+
+            if (id == 'leftDown') {
+                linear = -0.5 * power;
+                angular = -0.5 * power;
+            }
+            if (id == 'down') {
+                linear = -power;
+                angular = 0.0;
+            }
+            if (id == 'rightDown') {
+                linear = -0.5 * power;
+                angular = 0.5 * power;
+            }
+            valueLinear.innerText = linear.toFixed(2);
+            valueAngular.innerText = angular.toFixed(2);
+            twistSend(linear, angular);
+        }
+    </script>
+    <script src="../js/jquery-3.5.1.slim.min.js"></script>
+    <script src="../js/popper.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+</body>
+
+</html>
